@@ -42,10 +42,15 @@ export default function Ingest() {
     setBusy(false);
   }
 
+  const MAX_BYTES = 4_000_000;
   function onFile(e: React.ChangeEvent<HTMLInputElement>) {
     const f = e.target.files?.[0];
     if (!f) return;
+    const okType = /\.csv$/i.test(f.name) || f.type === "text/csv" || f.type === "application/vnd.ms-excel" || f.type === "";
+    if (!okType) { setErr(`Unsupported file type (${f.type || "unknown"}). Upload a .csv file.`); return; }
+    if (f.size > MAX_BYTES) { setErr(`File too large (${(f.size / 1e6).toFixed(1)} MB). Max 4 MB.`); return; }
     const reader = new FileReader();
+    reader.onerror = () => setErr("Could not read file.");
     reader.onload = () => { const t = String(reader.result || ""); setText(t); run(t); };
     reader.readAsText(f);
   }
@@ -90,7 +95,7 @@ export default function Ingest() {
         </div>
       </div>
 
-      <div className="lg:col-span-2 space-y-4">
+      <div className="lg:col-span-2 space-y-4 min-w-0">
         {!res && !busy && (
           <div className="panel p-10 text-center text-[12px] text-[var(--muted)] hud-frame">
             Awaiting dataset. Detection runs the moment a file lands.
@@ -114,7 +119,8 @@ export default function Ingest() {
               {res.top.length === 0 ? (
                 <div className="px-4 py-6 text-[12px] text-[var(--muted)]">No anomalies detected in this dataset.</div>
               ) : (
-                <table className="w-full text-[12px]">
+                <div className="overflow-x-auto">
+                <table className="w-full text-[12px] min-w-[420px]">
                   <tbody>
                     {res.top.map((c) => (
                       <tr key={c.id} className="border-t border-[var(--border)]">
@@ -127,6 +133,7 @@ export default function Ingest() {
                     ))}
                   </tbody>
                 </table>
+                </div>
               )}
             </div>
             {res.communities.length > 0 && (

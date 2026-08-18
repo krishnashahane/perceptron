@@ -8,7 +8,13 @@ import Copilot from "@/components/Copilot";
 import CaseActions from "@/components/CaseActions";
 import { inr, sevColor, dimLabel } from "@/lib/ui";
 
+import type { Metadata } from "next";
 export const dynamic = "force-dynamic";
+
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+  const { id } = await params;
+  return { title: `${id} · Case File`, description: `Explainable integrity-risk breakdown and evidence ledger for ${id}.` };
+}
 
 function mask(s: string) {
   return s.length <= 3 ? s : "•".repeat(s.length - 3) + s.slice(-3);
@@ -83,7 +89,7 @@ export default async function CasePage({ params }: { params: Promise<{ id: strin
         </div>
 
         {/* evidence */}
-        <div className="lg:col-span-2 panel p-5">
+        <div className="lg:col-span-2 panel p-5 min-w-0">
           <div className="flex items-center justify-between mb-3">
             <span className="kicker">why flagged · evidence ledger</span>
             <span className="text-[10px] text-[var(--muted)]">{c.evidence.length} indicators · {c.score}/100</span>
@@ -100,7 +106,7 @@ export default async function CasePage({ params }: { params: Promise<{ id: strin
                   {e.refs.some((r) => r.startsWith("B-")) && (
                     <div className="text-[10px] text-[var(--muted)] mt-0.5">
                       linked: {e.refs.filter((r) => r.startsWith("B-")).slice(0, 6).map((r) => (
-                        <Link key={r} href={`/cases/CASE-${r.slice(2)}`} className="hover:text-[var(--accent)]">{r} </Link>
+                        <Link key={r} href={`/cases/CASE-${r.slice(2)}`} prefetch={false} className="hover:text-[var(--accent)]">{r} </Link>
                       ))}
                     </div>
                   )}
@@ -126,7 +132,7 @@ export default async function CasePage({ params }: { params: Promise<{ id: strin
           <div className="kicker mb-2">risk dimensions</div>
           <Radar dims={c.dims} />
         </div>
-        <div className="lg:col-span-2">
+        <div className="lg:col-span-2 min-w-0">
           <Copilot caseId={c.id} />
         </div>
       </div>

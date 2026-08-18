@@ -1,6 +1,11 @@
 import { runEngine } from "@/lib/engine";
 import type { Case, Dataset, EngineResult } from "@/lib/types";
 
+// NOTE (architecture): all detection/scoring runs SERVER-SIDE. This module is
+// imported only by RSC pages and Node route handlers — never shipped to the
+// client. State is in-memory, per server instance (no DB): fine for the demo,
+// but the planned production path moves this to Postgres/Neo4j for persistence
+// and multi-instance consistency. See README "known limitations".
 // Compute the universe once per server process (deterministic, cache-safe).
 let cache: { data: Dataset; result: EngineResult } | null = null;
 

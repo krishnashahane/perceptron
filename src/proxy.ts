@@ -11,9 +11,9 @@ export async function proxy(request: NextRequest) {
     default-src 'self';
     script-src 'self' 'nonce-${nonce}' 'strict-dynamic'${isDev ? " 'unsafe-eval'" : ""};
     style-src 'self' 'unsafe-inline';
-    img-src 'self' blob: data:;
+    img-src 'self' blob: data: https://*.basemaps.cartocdn.com;
     font-src 'self';
-    connect-src 'self';
+    connect-src 'self' https://*.basemaps.cartocdn.com;
     object-src 'none';
     base-uri 'self';
     form-action 'self';

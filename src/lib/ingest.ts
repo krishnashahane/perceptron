@@ -45,7 +45,18 @@ function splitCsvLine(line: string): string[] {
     else cur += ch;
   }
   out.push(cur);
-  return out.map((s) => s.trim());
+  return out.map((s) => sanitizeCell(s));
+}
+
+// Neutralize CSV/spreadsheet formula-injection: any cell starting with = + - @
+// or a control char is prefixed with a single quote so Excel/Sheets treats it as
+// literal text, never an executable formula. Also strips control characters.
+export function sanitizeCell(raw: string): string {
+  // Strip ASCII control characters, then trim.
+  let s = raw.replace(/[\x00-\x1F\x7F]/g, "").trim();
+  // Prefix a single quote if it begins with a formula trigger (=, +, -, @).
+  if (s && /^[=+\-@]/.test(s)) s = "'" + s;
+  return s;
 }
 
 export function parseCsvToDataset(text: string, maxRows = 5000): IngestResult {

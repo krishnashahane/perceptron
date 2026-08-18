@@ -2,6 +2,11 @@ import { getResult } from "@/lib/store";
 import RiskGraph from "@/components/RiskGraph";
 import { inr } from "@/lib/ui";
 
+import type { Metadata } from "next";
+export const metadata: Metadata = {
+  title: "Collusion Network",
+  description: "Beneficiaries, bank accounts and contractors as one graph — multi-hop rings surfaced via community detection.",
+};
 export const dynamic = "force-dynamic";
 
 export default function GraphPage() {
@@ -20,7 +25,7 @@ export default function GraphPage() {
       </div>
 
       <div className="grid lg:grid-cols-3 gap-5">
-        <div className="lg:col-span-2 panel p-3 scan">
+        <div className="lg:col-span-2 panel p-3 scan min-w-0">
           <RiskGraph graph={r.graph} />
         </div>
 

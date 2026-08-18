@@ -15,12 +15,13 @@ export default function StatusStrip({ sectors, nodes }: { sectors: number; nodes
   }, [sectors]);
 
   const items = [
-    ["UPLINK", "SECURE", "var(--accent-2)"],
-    ["SCAN", `SECTOR ${String(tick + 1).padStart(2, "0")}/${sectors}`, "var(--accent)"],
-    ["NODES", `${nodes} TRACKED`, "var(--fg)"],
-    ["PACKETS", pkts.toLocaleString(), "var(--muted)"],
-    ["THREAT", "ELEVATED", "var(--high)"],
-    ["MODE", "AUTONOMOUS·HITL", "var(--muted)"],
+    // [label, value, color, responsive visibility] — lower-priority items drop first
+    ["UPLINK", "SECURE", "var(--accent-2)", "flex"],
+    ["SCAN", `SECTOR ${String(tick + 1).padStart(2, "0")}/${sectors}`, "var(--accent)", "flex"],
+    ["THREAT", "ELEVATED", "var(--high)", "hidden sm:flex"],
+    ["NODES", `${nodes} TRACKED`, "var(--fg)", "hidden md:flex"],
+    ["PACKETS", pkts.toLocaleString(), "var(--muted)", "hidden lg:flex"],
+    ["MODE", "AUTONOMOUS·HITL", "var(--muted)", "hidden xl:flex"],
   ] as const;
 
   const feed = [
@@ -40,17 +41,17 @@ export default function StatusStrip({ sectors, nodes }: { sectors: number; nodes
           <span className="text-[var(--crit)] tracking-widest">REC</span>
         </span>
         <div className="flex items-center gap-4 shrink-0">
-          {items.map(([k, v, c]) => (
-            <span key={k} className="flex items-center gap-1.5">
+          {items.map(([k, v, c, vis]) => (
+            <span key={k} className={`${vis} items-center gap-1.5`}>
               <span className="text-[var(--faint)]">{k}</span>
-              <span className="flick" style={{ color: c as string }}>{v}</span>
+              <span className="flick whitespace-nowrap" style={{ color: c as string }}>{v}</span>
             </span>
           ))}
         </div>
-        <div className="ml-auto min-w-0 flex-1 overflow-hidden hidden md:block">
+        <div className="ml-auto min-w-0 flex-1 overflow-hidden hidden md:block" aria-hidden>
           <div className="ticker-track text-[var(--muted)]">
             {[...feed, ...feed].map((f, i) => (
-              <span key={i} className="mx-4">▸ {f}</span>
+              <span key={i} className="mx-4 whitespace-nowrap">▸ {f}</span>
             ))}
           </div>
         </div>

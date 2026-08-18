@@ -2,6 +2,11 @@ import { redirect } from "next/navigation";
 import { getSession } from "@/lib/session";
 import { recentAudit, verifyChain } from "@/lib/audit";
 
+import type { Metadata } from "next";
+export const metadata: Metadata = {
+  title: "Audit Trail",
+  description: "Hash-chained, append-only WORM ledger of every operator action — tamper-evident and reviewable.",
+};
 export const dynamic = "force-dynamic";
 
 export default async function AuditPage() {
@@ -32,7 +37,8 @@ export default async function AuditPage() {
       </div>
 
       <div className="panel overflow-hidden">
-        <table className="w-full text-[12px]">
+        <div className="overflow-x-auto">
+        <table className="w-full text-[12px] min-w-[640px]">
           <thead>
             <tr className="text-[var(--faint)] text-[10px] uppercase tracking-wider">
               <th className="text-left font-normal px-4 py-2.5">time (utc)</th>
@@ -46,7 +52,20 @@ export default async function AuditPage() {
           </thead>
           <tbody>
             {log.length === 0 && (
-              <tr><td colSpan={7} className="px-4 py-6 text-[var(--muted)]">No activity recorded yet.</td></tr>
+              <tr>
+                <td colSpan={7} className="px-4 py-12">
+                  <div className="hud-frame max-w-sm mx-auto text-center panel p-6">
+                    <div className="flex items-center justify-center gap-1.5">
+                      <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent-2)] dot-live" />
+                      <span className="kicker">ledger armed · awaiting first event</span>
+                    </div>
+                    <p className="text-[12px] text-[var(--muted)] mt-3">
+                      No operator actions sealed yet. The moment anyone authenticates, investigates or escalates,
+                      a hash-chained entry appears here — tamper-evident from entry #0.
+                    </p>
+                  </div>
+                </td>
+              </tr>
             )}
             {log.map((e, i) => (
               <tr key={i} className="border-t border-[var(--border)]">
@@ -65,6 +84,7 @@ export default async function AuditPage() {
             ))}
           </tbody>
         </table>
+        </div>
       </div>
     </div>
   );

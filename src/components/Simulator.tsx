@@ -10,7 +10,8 @@ export default function Simulator({ hubs, cases, totalExposure }: { hubs: Hub[];
   const toggle = (id: string) =>
     setDisrupted((s) => {
       const n = new Set(s);
-      n.has(id) ? n.delete(id) : n.add(id);
+      if (n.has(id)) n.delete(id);
+      else n.add(id);
       return n;
     });
 
@@ -32,7 +33,7 @@ export default function Simulator({ hubs, cases, totalExposure }: { hubs: Hub[];
   return (
     <div className="grid lg:grid-cols-3 gap-5">
       {/* control */}
-      <div className="lg:col-span-2 panel p-4">
+      <div className="lg:col-span-2 panel p-4 min-w-0">
         <div className="flex items-center justify-between mb-3">
           <span className="kicker">disruption targets · toggle to neutralize a hub</span>
           <span className="text-[10px] text-[var(--muted)]">{disrupted.size} disrupted</span>

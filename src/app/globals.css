@@ -1,23 +1,51 @@
 @import "tailwindcss";
 
-/* PERCEPTRON — command-center dark theme. Committed single look. */
+/* PERCEPTRON — ASTRA tactical command theme. Committed single dark look.
+   Steel-blue primary on deep charcoal surfaces (Material-3 operational). */
 :root {
-  --bg: #05070a;
-  --bg-elev: #0a0e14;
-  --panel: #0c1119;
-  --border: #182130;
-  --border-bright: #223047;
-  --fg: #d7e0ea;
-  --muted: #6b7a90;
-  --faint: #3a4658;
-  --accent: #22d3ee; /* cyan */
-  --accent-2: #34f5c5; /* mint */
-  --crit: #ff4d5e;
-  --high: #ff9f43;
-  --med: #ffd24a;
-  --low: #34f5c5;
-  --grid: rgba(34, 211, 238, 0.045);
+  --bg: #0c0f10;            /* surface-container-lowest */
+  --bg-elev: #191c1e;       /* surface-container-low */
+  --panel: #1d2022;         /* surface-container */
+  --panel-high: #282a2c;    /* surface-container-high */
+  --border: #2a2f33;        /* outline-variant, nudged for crisp hairlines */
+  --border-bright: #44474d; /* outline-variant bright */
+  --fg: #e1e2e4;            /* on-surface */
+  --muted: #c4c6ce;         /* on-surface-variant (WCAG AA on --bg) */
+  --faint: #8e9198;         /* outline — readable on projectors */
+  --accent: #b3c8e8;        /* primary — steel blue */
+  --accent-2: #86e5cf;      /* positive / live */
+  --crit: #ffb4ab;          /* error */
+  --high: #ffc98a;          /* warn */
+  --med: #ffe08a;
+  --low: #86e5cf;
+  --on-accent: #10243b;     /* text on --accent (accent is light in dark theme) */
+  --grid: rgba(179, 200, 232, 0.035);
 }
+
+/* Light theme — professional operations daylight mode. Same token contract,
+   so every component reskins with no per-component edits. */
+:root[data-theme="light"] {
+  --bg: #f3f5f8;
+  --bg-elev: #eaeef3;
+  --panel: #ffffff;
+  --panel-high: #e7ecf1;
+  --border: #d5dbe2;
+  --border-bright: #b4bdc8;
+  --fg: #171c22;
+  --muted: #465059;
+  --faint: #697079;
+  --accent: #35618e;
+  --accent-2: #1f8f77;
+  --crit: #b3261e;
+  --high: #9a5b00;
+  --med: #7a6100;
+  --low: #1f8f77;
+  --on-accent: #ffffff;
+  --grid: rgba(53, 97, 142, 0.05);
+}
+/* Suppress CRT/scan chrome in daylight mode for a clean, sober console */
+:root[data-theme="light"] .crt-overlay,
+:root[data-theme="light"] .vscan-line { display: none; }
 
 @theme inline {
   --color-bg: var(--bg);
@@ -30,8 +58,8 @@
   --color-high: var(--high);
   --color-med: var(--med);
   --color-low: var(--low);
-  --font-mono: var(--font-geist-mono);
-  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-mono);
+  --font-sans: var(--font-sans);
 }
 
 * {
@@ -45,40 +73,47 @@ html {
 body {
   background: var(--bg);
   color: var(--fg);
-  font-family: var(--font-geist-mono), ui-monospace, monospace;
-  font-feature-settings: "ss01", "cv01";
+  font-family: var(--font-sans), Inter, ui-sans-serif, system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
   background-image:
     linear-gradient(var(--grid) 1px, transparent 1px),
     linear-gradient(90deg, var(--grid) 1px, transparent 1px);
   background-size: 42px 42px;
   background-attachment: fixed;
+  letter-spacing: 0.005em;
+}
+
+/* Display face for headings — IBM Plex Sans, tactical + legible */
+h1, h2, h3 {
+  font-family: var(--font-display), var(--font-sans), sans-serif;
 }
 
 /* Scrollbar */
-::-webkit-scrollbar { width: 9px; height: 9px; }
+::-webkit-scrollbar { width: 8px; height: 8px; }
 ::-webkit-scrollbar-track { background: var(--bg); }
-::-webkit-scrollbar-thumb { background: #1a2536; border-radius: 6px; }
-::-webkit-scrollbar-thumb:hover { background: #26374f; }
+::-webkit-scrollbar-thumb { background: #2a3238; border-radius: 6px; }
+::-webkit-scrollbar-thumb:hover { background: #3a444c; }
 
 /* Utility layer */
 @layer utilities {
   .panel {
-    background: linear-gradient(180deg, rgba(255,255,255,0.015), transparent), var(--panel);
+    background: linear-gradient(180deg, rgba(255,255,255,0.014), transparent), var(--panel);
     border: 1px solid var(--border);
-    border-radius: 10px;
+    border-radius: 8px;
   }
+  .panel-hover { transition: border-color .15s ease, background .15s ease; }
   .panel-hover:hover { border-color: var(--border-bright); }
-  .glow { box-shadow: 0 0 0 1px rgba(34,211,238,0.15), 0 0 24px -6px rgba(34,211,238,0.25); }
-  .text-glow { text-shadow: 0 0 12px rgba(34,211,238,0.5); }
-  .mono { font-family: var(--font-geist-mono), monospace; }
-  .kicker { font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--muted); }
+  .glow { box-shadow: 0 0 0 1px rgba(179,200,232,0.14), 0 0 24px -6px rgba(179,200,232,0.22); }
+  .text-glow { text-shadow: 0 0 12px rgba(179,200,232,0.4); }
+  .mono { font-family: var(--font-mono), ui-monospace, monospace; letter-spacing: 0.02em; }
+  .kicker { font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--faint); font-weight: 600; }
   .hairline { border-top: 1px solid var(--border); }
   .scan { position: relative; overflow: hidden; }
   .scan::after {
     content: ""; position: absolute; inset: 0; pointer-events: none;
-    background: repeating-linear-gradient(0deg, rgba(0,0,0,0), rgba(0,0,0,0) 3px, rgba(0,0,0,0.15) 3px, rgba(0,0,0,0.15) 4px);
-    mix-blend-mode: overlay; opacity: 0.35;
+    background: repeating-linear-gradient(0deg, rgba(0,0,0,0), rgba(0,0,0,0) 3px, rgba(0,0,0,0.12) 3px, rgba(0,0,0,0.12) 4px);
+    mix-blend-mode: overlay; opacity: 0.3;
   }
 }
 
@@ -90,7 +125,7 @@ body {
 @keyframes sweep { from { transform: translateX(-100%);} to { transform: translateX(100%);} }
 .sweep::before {
   content:""; position:absolute; inset:0;
-  background: linear-gradient(90deg, transparent, rgba(34,211,238,0.08), transparent);
+  background: linear-gradient(90deg, transparent, rgba(179,200,232,0.08), transparent);
   animation: sweep 3.5s linear infinite;
 }
 @keyframes rise { from { opacity:0; transform: translateY(6px);} to { opacity:1; transform:none;} }
@@ -102,25 +137,26 @@ body {
 
 /* ───────────────────────── SURVEILLANCE HUD ───────────────────────── */
 
-/* Global CRT vignette + faint scanlines + noise, non-interactive overlay */
+/* Global CRT vignette + faint scanlines, non-interactive overlay. Kept subtle
+   so the console reads professional, not gimmicky. */
 .crt-overlay {
   position: fixed; inset: 0; pointer-events: none; z-index: 60;
 }
 .crt-overlay::before {
   content: ""; position: absolute; inset: 0;
-  background: repeating-linear-gradient(0deg, rgba(0,0,0,0) 0, rgba(0,0,0,0) 2px, rgba(0,0,0,0.10) 3px);
-  opacity: 0.5;
+  background: repeating-linear-gradient(0deg, rgba(0,0,0,0) 0, rgba(0,0,0,0) 2px, rgba(0,0,0,0.06) 3px);
+  opacity: 0.4;
 }
 .crt-overlay::after {
   content: ""; position: absolute; inset: 0;
-  background: radial-gradient(120% 120% at 50% 50%, transparent 55%, rgba(0,0,0,0.55) 100%);
+  background: radial-gradient(120% 120% at 50% 50%, transparent 58%, rgba(0,0,0,0.45) 100%);
 }
 
 @keyframes vscan { from { transform: translateY(-100%);} to { transform: translateY(100vh);} }
 .vscan-line {
   position: fixed; left: 0; right: 0; height: 120px; pointer-events: none; z-index: 61;
-  background: linear-gradient(180deg, transparent, rgba(34,211,238,0.06), transparent);
-  animation: vscan 7s linear infinite;
+  background: linear-gradient(180deg, transparent, rgba(179,200,232,0.05), transparent);
+  animation: vscan 8s linear infinite;
 }
 
 /* Corner-bracket HUD frame around any element */
@@ -159,8 +195,8 @@ body {
 .glitch { position: relative; }
 .glitch::after {
   content: attr(data-text); position: absolute; left: 0; top: 0;
-  color: var(--accent); mix-blend-mode: screen; opacity: 0.55;
-  animation: glitch 4s infinite steps(1);
+  color: var(--accent); mix-blend-mode: screen; opacity: 0.5;
+  animation: glitch 5s infinite steps(1);
 }
 
 /* REC blinking dot */
@@ -175,6 +211,18 @@ body {
 @keyframes flick { 0% { color: var(--accent-2); } 100% { color: inherit; } }
 .flick { animation: flick .5s ease; }
 
+/* Loading skeleton shimmer */
+@keyframes shimmer { 0% { background-position: -200px 0; } 100% { background-position: 200px 0; } }
+.skel {
+  background-image: linear-gradient(90deg, rgba(179,200,232,0.04), rgba(179,200,232,0.18), rgba(179,200,232,0.04));
+  background-size: 200px 100%;
+  animation: shimmer 1.3s linear infinite;
+}
+
+/* Hide scrollbar but keep scroll (for narrow nav / overflow rows) */
+.no-scrollbar { scrollbar-width: none; -ms-overflow-style: none; }
+.no-scrollbar::-webkit-scrollbar { display: none; }
+
 /* Thin animated top progress/scan bar */
 @keyframes barpan { from { background-position: 0 0; } to { background-position: 200px 0; } }
 .scanbar {
@@ -183,3 +231,33 @@ body {
   background-size: 200px 100%;
   animation: barpan 2.5s linear infinite;
 }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; }
+  .vscan-line, .ticker-track { display: none; }
+}
+
+/* ───────────────────────── LEAFLET (tactical GIS) ───────────────────────── */
+.leaflet-container { background: var(--bg) !important; font-family: var(--font-mono), monospace; }
+.leaflet-tile { filter: saturate(0.85) contrast(1.02); }
+.leaflet-bar a,
+.leaflet-control-zoom a {
+  background: var(--panel) !important;
+  color: var(--muted) !important;
+  border-color: var(--border) !important;
+}
+.leaflet-bar a:hover { background: var(--panel-high) !important; color: var(--accent) !important; }
+.leaflet-control-attribution {
+  background: color-mix(in srgb, var(--bg) 80%, transparent) !important;
+  color: var(--faint) !important;
+}
+.leaflet-control-attribution a { color: var(--muted) !important; }
+.leaflet-tooltip {
+  background: var(--panel) !important;
+  border: 1px solid var(--border-bright) !important;
+  color: var(--fg) !important;
+  box-shadow: 0 4px 18px -6px rgba(0,0,0,0.6) !important;
+  border-radius: 6px !important;
+}
+.leaflet-tooltip-top::before { border-top-color: var(--border-bright) !important; }
+.leaflet-tooltip b { font-weight: 700; }

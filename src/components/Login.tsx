@@ -70,8 +70,8 @@ export default function Login() {
         style={{ background: "radial-gradient(60% 50% at 50% 30%, rgba(34,211,238,0.08), transparent 70%)" }} />
       <div className="w-full max-w-xl relative">
         <div className="mb-4 flex items-center gap-2">
-          <span className="w-2.5 h-2.5 rounded-full bg-[var(--accent)] dot-live" />
-          <span className="kicker">secure terminal · gov-integrity intelligence</span>
+          <span className="w-2.5 h-2.5 rounded-full bg-[var(--crit)] dot-live" />
+          <span className="kicker">session locked · authenticate to proceed</span>
         </div>
 
         <div className="panel scan p-5 relative overflow-hidden">

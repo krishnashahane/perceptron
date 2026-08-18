@@ -2,6 +2,11 @@ import { redirect } from "next/navigation";
 import { getSession } from "@/lib/session";
 import Ingest from "@/components/Ingest";
 
+import type { Metadata } from "next";
+export const metadata: Metadata = {
+  title: "Ledger Ingestion",
+  description: "Upload a real scheme dataset (CSV) and run the full rule + graph + anomaly engine on your records.",
+};
 export const dynamic = "force-dynamic";
 
 export default async function IngestPage() {

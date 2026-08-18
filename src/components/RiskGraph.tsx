@@ -80,6 +80,11 @@ export default function RiskGraph({ graph, interactive = true }: { graph: RG; in
               onMouseLeave={() => interactive && setHover(null)}
               onClick={() => interactive && isBen && router.push(`/cases/CASE-${n.id.slice(2)}`)}
             >
+              <title>
+                {isBen
+                  ? `${n.label} · integrity risk ${n.risk}/100 — click to open case`
+                  : `${st.label} ${n.label} · shared hub linking flagged beneficiaries`}
+              </title>
               {hover === n.id && <circle r={22} fill="url(#halo)" />}
               {isBen && n.risk >= 75 && (
                 <circle r={st.r} fill="none" stroke={fill} strokeWidth={1} className="ping-ring" style={{ transformOrigin: "center" }} />

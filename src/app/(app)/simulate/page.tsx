@@ -1,6 +1,11 @@
 import { getSimulation } from "@/lib/store";
 import Simulator from "@/components/Simulator";
 
+import type { Metadata } from "next";
+export const metadata: Metadata = {
+  title: "What-If Simulator",
+  description: "Model an intervention before it happens — disrupt a hub and quantify the public money it would protect.",
+};
 export const dynamic = "force-dynamic";
 
 export default function SimulatePage() {

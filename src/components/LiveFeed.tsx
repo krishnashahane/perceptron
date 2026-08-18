@@ -58,13 +58,21 @@ export default function LiveFeed({ items }: { items: FeedItem[] }) {
         </span>
       </div>
       <div className="divide-y divide-[var(--border)]">
-        {feed.length === 0 && (
-          <div className="px-4 py-6 text-[12px] text-[var(--muted)]">listening…</div>
-        )}
+        {feed.length === 0 &&
+          Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="flex items-center gap-3 px-4 py-2.5">
+              <span className="w-16 h-3 rounded skel" />
+              <span className="w-1.5 h-6 rounded-sm skel" />
+              <span className="flex-1 h-3 rounded skel" />
+              <span className="w-8 h-3 rounded skel" />
+            </div>
+          ))}
         {feed.map(({ item, t }, i) => (
           <Link
             key={`${item.id}-${t}-${i}`}
             href={`/cases/${item.id}`}
+            prefetch={false}
+            title={`${item.severity.toUpperCase()} · score ${item.score} · ${item.signals.slice(0, 3).join(", ").replace(/_/g, " ")}`}
             className="flex items-center gap-3 px-4 py-2.5 hover:bg-[var(--bg-elev)] rise"
           >
             <span className="text-[10px] text-[var(--faint)] tabular-nums w-16 shrink-0">{t}</span>
