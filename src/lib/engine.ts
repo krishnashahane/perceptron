@@ -211,12 +211,38 @@ export function detect(data: Dataset): { data: Dataset; result: EngineResult } {
     // Only label as a ring when 2+ flagged members share a component.
     c.clusterId = rootSize > 1 ? `RING-${root.slice(2)}` : null;
     if (!c.clusterId) continue;
-    const e = communityMap.get(c.clusterId) ?? { id: c.clusterId, members: 0, exposure: 0, districts: [] as string[], caseIds: [] as string[] };
+    const e = communityMap.get(c.clusterId) ?? { id: c.clusterId, members: 0, exposure: 0, districts: [] as string[], caseIds: [] as string[], sharedBanks: 0, sharedPhones: 0, sharedDocs: 0, summary: "" };
     e.members++;
     e.exposure += c.amountAtRisk;
     if (!e.districts.includes(c.district)) e.districts.push(c.district);
     e.caseIds.push(c.id);
     communityMap.set(c.clusterId, e);
+  }
+
+  // Plain-English "why flagged" per ring: count attributes actually SHARED by
+  // 2+ members (a lone member's bank isn't collusion evidence).
+  const caseById = new Map(cases.map((c) => [c.id, c]));
+  for (const e of communityMap.values()) {
+    const memberIds = e.caseIds.map((id) => caseById.get(id)!.beneficiaryId);
+    const memberSet = new Set(memberIds);
+    const countShared = (index: Map<string, string[]>) => {
+      let n = 0;
+      for (const peers of index.values()) {
+        if (peers.filter((p) => memberSet.has(p)).length > 1) n++;
+      }
+      return n;
+    };
+    e.sharedBanks = countShared(byBank);
+    e.sharedPhones = countShared(byPhone);
+    e.sharedDocs = countShared(byDoc);
+    const parts: string[] = [];
+    if (e.sharedBanks) parts.push(`${e.sharedBanks} bank account${e.sharedBanks > 1 ? "s" : ""}`);
+    if (e.sharedPhones) parts.push(`${e.sharedPhones} phone number${e.sharedPhones > 1 ? "s" : ""}`);
+    if (e.sharedDocs) parts.push(`${e.sharedDocs} document${e.sharedDocs > 1 ? "s" : ""}`);
+    const shared = parts.length
+      ? parts.slice(0, -1).join(", ") + (parts.length > 1 ? " and " : "") + parts[parts.length - 1]
+      : "linked records";
+    e.summary = `${e.members} beneficiaries share ${shared} across ${e.districts.length} district${e.districts.length > 1 ? "s" : ""}.`;
   }
   const communities = [...communityMap.values()].sort((a, b) => b.exposure - a.exposure);
 
@@ -237,8 +263,10 @@ export function detect(data: Dataset): { data: Dataset; result: EngineResult } {
 
   cases.sort((a, b) => b.score - a.score);
 
-  // ---- Risk graph (top cases + linked entities) ----
-  const graph = buildGraph(cases.slice(0, 60), data);
+  // ---- Risk graph (top cases + full membership of the top rings) ----
+  const ringCaseIds = new Set(communities.slice(0, 8).flatMap((c) => c.caseIds));
+  const graphCases = cases.filter((c, i) => i < 60 || ringCaseIds.has(c.id));
+  const graph = buildGraph(graphCases, data);
 
   // ---- District aggregation + predictive risk ----
   const districts = aggregateDistricts(cases, data);
@@ -295,13 +323,13 @@ function buildGraph(cases: Case[], data: Dataset): RiskGraph {
   const benById = new Map(data.beneficiaries.map((b) => [b.id, b]));
   const seen = new Set<string>();
 
-  const place = (id: string, kind: GraphNode["kind"], label: string, risk: number) => {
-    if (!nodes.has(id)) nodes.set(id, { id, kind, label, risk, x: 0, y: 0 });
+  const place = (id: string, kind: GraphNode["kind"], label: string, risk: number, ring: string | null = null) => {
+    if (!nodes.has(id)) nodes.set(id, { id, kind, label, risk, ring, x: 0, y: 0 });
   };
 
   for (const c of cases) {
     const b = benById.get(c.beneficiaryId)!;
-    place(b.id, "beneficiary", b.id, c.score);
+    place(b.id, "beneficiary", b.id, c.score, c.clusterId);
     place(b.bankAccountId, "bank", b.bankAccountId, 60);
     place(b.contractorId, "contractor", b.contractorId, 50);
     const key = `${b.id}|${b.bankAccountId}`;

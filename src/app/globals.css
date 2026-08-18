@@ -1,6 +1,6 @@
 @import "tailwindcss";
 
-/* PERCEPTRON — ASTRA tactical command theme. Committed single dark look.
+/* PERCEPTRON — tactical command theme. Committed single dark look.
    Steel-blue primary on deep charcoal surfaces (Material-3 operational). */
 :root {
   --bg: #0c0f10;            /* surface-container-lowest */

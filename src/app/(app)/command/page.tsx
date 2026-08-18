@@ -173,7 +173,7 @@ export default async function CommandPage() {
               <span className="text-[10px] text-[var(--muted)] group-hover:text-[var(--accent)]">expand ▸</span>
             </div>
             <div className="pointer-events-none opacity-90">
-              <RiskGraph graph={r.graph} interactive={false} />
+              <RiskGraph graph={r.graph} communities={r.communities} interactive={false} />
             </div>
           </Link>
         </div>

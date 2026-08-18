@@ -18,9 +18,14 @@ export default async function AppLayout({ children }: LayoutProps<"/">) {
         <span className="text-[var(--crit)] hidden sm:inline">▲</span>
       </div>
       <TopBar user={session.user} role={session.role} />
-      <StatusStrip sectors={8} nodes={r.kpis.beneficiaries} />
+      <StatusStrip flagged={r.kpis.flagged} rings={r.communities.length} precision={r.eval.precision} />
       <div className="mx-auto w-full max-w-[1400px] px-4 py-5 flex-1">{children}</div>
-      <TelemetryBar />
+      <TelemetryBar
+        flagged={r.kpis.flagged}
+        rings={r.communities.length}
+        exposure={r.kpis.amountAtRisk}
+        critical={r.kpis.critical}
+      />
     </div>
   );
 }

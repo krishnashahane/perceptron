@@ -118,6 +118,10 @@ export interface Community {
   exposure: number;
   districts: string[];
   caseIds: string[];
+  sharedBanks: number;
+  sharedPhones: number;
+  sharedDocs: number;
+  summary: string; // one-line plain-English "why flagged"
 }
 
 export interface Hub {
@@ -133,6 +137,7 @@ export interface GraphNode {
   kind: "beneficiary" | "bank" | "contractor" | "official";
   label: string;
   risk: number;
+  ring: string | null; // ring (community) id for beneficiaries; hubs infer from edges
   x: number;
   y: number;
 }
