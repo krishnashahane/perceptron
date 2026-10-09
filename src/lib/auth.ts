@@ -14,7 +14,10 @@ export interface Session {
 }
 
 function secret(): string {
-  return process.env.PERCEPTRON_SECRET || "dev-only-insecure-secret-change-me";
+  const configured = process.env.PERCEPTRON_SECRET;
+  if (configured && configured.length >= 32) return configured;
+  if (process.env.NODE_ENV === "production") return "";
+  return "dev-only-insecure-secret-change-me";
 }
 
 const enc = new TextEncoder();
@@ -69,10 +72,11 @@ export function newSession(user: string, role: Role): Session {
 
 // Demo credential store. In production these map to an IdP / hashed store.
 interface Cred { pass: string; role: Role }
+const isProduction = process.env.NODE_ENV === "production";
 const CREDS: Record<string, Cred> = {
-  analyst: { pass: process.env.PERCEPTRON_PW_ANALYST || "perceptron-analyst", role: "analyst" },
-  investigator: { pass: process.env.PERCEPTRON_PW_INVESTIGATOR || "perceptron-invest", role: "investigator" },
-  admin: { pass: process.env.PERCEPTRON_PW_ADMIN || "perceptron-admin", role: "admin" },
+  analyst: { pass: process.env.PERCEPTRON_PW_ANALYST || (isProduction ? "" : "perceptron-analyst"), role: "analyst" },
+  investigator: { pass: process.env.PERCEPTRON_PW_INVESTIGATOR || (isProduction ? "" : "perceptron-invest"), role: "investigator" },
+  admin: { pass: process.env.PERCEPTRON_PW_ADMIN || (isProduction ? "" : "perceptron-admin"), role: "admin" },
 };
 
 // Constant-time-ish compare to avoid trivial timing leaks.
