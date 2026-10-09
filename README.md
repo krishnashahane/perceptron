@@ -1,67 +1,79 @@
 # Perceptron
 
-Most fraud in government welfare schemes doesn't look like fraud on any single record. A payment is valid. A beneficiary is real. An approval is signed. The leakage lives in the *relationships* — ten "different" people sharing one bank account, a contractor whose entire roster of beneficiaries clears approval in under two minutes, a cluster of addresses that only exists on paper.
+Perceptron is a **government fund-integrity intelligence demo** built for Smart India Hackathon 2026. It analyzes welfare-scheme records, detects suspicious patterns, reconstructs relationship networks, and gives investigators an explainable, ranked review queue.
 
-Perceptron is a command console that surfaces those patterns before the money is gone. It ingests scheme records, scores every case across six independent risk dimensions, reconstructs the collusion networks hiding underneath, and hands an investigator a ranked, explainable queue instead of a spreadsheet.
-
-Live: https://perceptron-ai-tau.vercel.app
-
-Built for Smart India Hackathon 2026 (Team Perceptron).
-
----
+It is designed for **investigative support, not automatic enforcement**.
 
 ## What it does
 
-- **Detects, then explains.** Every flag comes with the specific signals that raised it — duplicate identity, shared payment endpoint, abnormal approval latency, geographic clustering, process violations, document reuse. Nothing is a black box.
-- **Finds rings, not just rows.** A union-find pass over shared banks, phones and documents rebuilds the actual networks so a coordinated fraud shows up as one case, not forty unrelated ones.
-- **Ranks by money at risk.** Investigators work the highest-exposure cases first, with a live predictive view of which districts are trending.
-- **Keeps a human in the loop.** The system recommends; it never auto-acts. Every investigate / escalate / resolve is written to a hash-chained, tamper-evident audit log.
-- **Runs in real time.** A server-authoritative detection stream feeds the console as cases surface, with an offline-safe fallback.
+Perceptron combines three layers:
 
-## How the detection works
+1. **Deterministic rules** — detects signals such as shared bank accounts, shared phones, duplicate documents, geographic clustering, contractor concentration, burst payments, payment-before-inspection, and unusually fast approvals.
+2. **Statistical anomaly scoring** — produces an independent anomaly score from payment amount, approval latency, and burst behavior.
+3. **Graph analysis** — reconstructs multi-hop clusters from shared entities so related beneficiaries can be reviewed together.
 
-The engine is deliberately not a single model you have to trust on faith. It combines:
+Each flagged case contains the signals contributing to its score, relevant entities, financial exposure, severity, and linked records.
 
-1. A **rules layer** — deterministic checks for the six risk dimensions, each contributing a weighted, inspectable score.
-2. An **unsupervised model layer** — z-score and isolation-style anomaly detection that flags outliers the rules didn't anticipate. Both scores are shown side by side.
-3. A **graph layer** — community detection over shared attributes to expose coordinated behaviour.
+## How it works
 
-To keep the numbers honest, the platform runs on a deterministic synthetic dataset (seed 42, ~1,500 beneficiaries) with a *known* set of injected fraud rings across strong, medium and weak tiers, plus benign coincidences designed to bait false positives. The engine rediscovers them independently, and the console reports its real measured performance against that ground truth:
+    Scheme records
+          ↓
+    validation / normalization
+          ↓
+    risk-signal extraction
+          ↓
+    rule-based score + anomaly score
+          ↓
+    case ranking
+          ↓
+    relationship graph
+          ↓
+    investigator review queue
+          ↓
+    audit / decision log
 
-| Metric | Score |
-|---|---|
-| Precision | 0.94 |
-| Recall | 0.81 |
-| F1 | 0.87 |
+The bundled demo dataset is generated deterministically with seed `42`, so the same code produces the same synthetic universe.
 
-A live threshold tuner lets you drag the operating point and watch precision, recall and the PR trade-off update in place.
+The generator injects known anomaly labels for evaluation. The detection engine does not use those labels while scoring cases; they are reserved for evaluation metrics.
 
-## Tour
+## Main routes
 
-- `/` — access console (login)
-- `/command` — KPIs, live detection feed, geospatial district-risk map, highest-risk cases, predictive district risk
-- `/graph` — the collusion network
-- `/cases/[id]` — full case file: risk gauge, dimension radar, evidence ledger, role-gated actions, an explainability copilot
-- `/simulate` — what-if analysis: disrupt a bank or contractor hub and see the exposure it would have prevented
-- `/ingest` — upload your own CSV and run the same engine on it (admin)
-- `/audit` — the tamper-evident decision log (admin)
+- `/` — login
+- `/command` — operations console, KPIs, live detection feed, district risk, and high-risk cases
+- `/graph` — relationship/collusion graph
+- `/cases/[id]` — case file, evidence, risk dimensions, actions, and explainability copilot
+- `/simulate` — disruption/what-if analysis
+- `/ingest` — admin CSV ingestion and detection
+- `/audit` — admin audit trail
 
 ## Stack
 
-Next.js 16 (App Router) · TypeScript · Tailwind CSS v4 · Leaflet · Zod · Web Crypto.
+- Next.js 16.3.8
+- React 19
+- TypeScript
+- Tailwind CSS v4
+- Leaflet / React Leaflet
+- Zod
+- Web Crypto
+- Optional Gemini API for copilot responses
 
-No database — the analytical dataset is generated deterministically at runtime, which keeps the demo reproducible and the deployment stateless. Uploaded CSVs are processed in memory only.
+The application is intentionally stateless at runtime. The analytical dataset is generated in memory, and uploaded CSV data is processed in memory rather than persisted.
 
-## Running locally
+## Requirements
 
-```bash
-npm install
-npm run dev
-```
+- Node.js 20.9+
+- npm 10+
 
-Then open http://localhost:3000.
+Next.js 16 requires Node.js 20.9 or newer. citeturn968351search2
 
-Demo accounts (roles map to different permissions):
+## Run locally
+
+    npm install
+    npm run dev
+
+Open `http://localhost:3000`.
+
+Development demo credentials:
 
 | Role | Username | Password |
 |---|---|---|
@@ -69,30 +81,117 @@ Demo accounts (roles map to different permissions):
 | Investigator | `investigator` | `perceptron-invest` |
 | Admin | `admin` | `perceptron-admin` |
 
-### Environment
+## Production configuration
 
-Copy `.env.example` to `.env.local`. Everything runs without configuration; two optional variables unlock more:
+Copy `.env.example` to `.env.local` and configure:
 
-- `PERCEPTRON_SECRET` — HMAC key for signed session cookies (set a long random string in production).
-- `GEMINI_API_KEY` — enables AI-synthesised copilot answers. Without it the copilot still works fully via the deterministic, evidence-grounded engine.
+    PERCEPTRON_SECRET=<long-random-secret>
+    PERCEPTRON_PW_ANALYST=<strong-password>
+    PERCEPTRON_PW_INVESTIGATOR=<strong-password>
+    PERCEPTRON_PW_ADMIN=<strong-password>
 
-### Scripts
+Optional AI copilot:
 
-```bash
-npm run dev          # local dev server
-npm run build        # production build
-npm run test:unit    # ingestion + detection unit tests
-npm run test:e2e     # Playwright end-to-end
-```
+    GEMINI_API_KEY=<key>
+    GEMINI_MODEL=gemini-2.5-flash
 
-## Security
+When `NODE_ENV=production`, the application does not fall back to the development signing secret or built-in demo passwords.
 
-Authentication is a stateless, HMAC-SHA256 signed httpOnly cookie verified with Web Crypto, so the same code runs in route handlers and at the edge. Requests are gated by role (analyst / investigator / admin), validated with Zod, and rate-limited per IP. A nonce-based Content-Security-Policy, HSTS and the usual hardening headers are applied to every response. Uploaded CSVs are sanitised against formula injection before parsing.
+## Authentication and security
 
-## Notes on the design
+Authentication uses an HMAC-SHA-256 signed, HttpOnly session cookie.
 
-The interface is intentionally built like an operations console rather than a dashboard — dense, dark, telemetry-forward — because that is the environment this kind of work actually happens in. It ships with a daylight mode for projectors and well-lit rooms.
+The application also applies:
 
----
+- Zod validation on API inputs
+- bounded per-IP rate limiting
+- CSP with per-request nonces
+- HSTS in production
+- `X-Content-Type-Options` and `X-Frame-Options`
+- strict referrer and permissions policies
+- CSV formula-injection neutralization
+- finite-number validation for imported payment amounts
+- role-based authorization for protected actions
+- server-side session verification
+- no browser `localStorage` session token
 
-**Author:** Krishna Shahane
+## CSV ingestion
+
+The `/ingest` route requires these fields:
+
+    beneficiary_id
+    district
+    bank_account
+    contractor_id
+    amount
+    payment_ts
+
+Optional fields include `name`, `phone`, `lat`, `lng`, `address_cluster`, `inspection_ts`, `doc_hash`, and `approval_latency_min`.
+
+Uploads are capped at 4 MB and 5,000 rows. Data is analyzed in memory.
+
+Invalid or non-finite payment amounts are rejected rather than silently converted to zero.
+
+## Copilot
+
+Without `GEMINI_API_KEY`, the application uses the deterministic offline explanation engine.
+
+With Gemini configured, the model receives the case facts and question and is instructed to answer from those facts only. External-model failure falls back to the deterministic engine.
+
+AI output is advisory and cannot perform investigative actions.
+
+## Evaluation
+
+The application reports precision, recall, F1, true positives, false positives, and false negatives against the synthetic ground truth.
+
+These numbers describe the bundled synthetic dataset. They are not evidence of production fraud-detection accuracy.
+
+The threshold tuner lets you explore the precision/recall operating point.
+
+## Audit trail
+
+Operator actions are stored in an in-memory SHA-256 hash chain.
+
+The audit page recomputes the retained chain and reports whether it is internally consistent.
+
+This is tamper-evident within the running process, not a durable WORM archive. Restarting the application clears the in-memory audit log.
+
+## Development checks
+
+    npm run lint
+    npm run typecheck
+    npm run test:unit
+    npm run test:e2e
+    npm run check
+
+GitHub Actions also runs lint, typecheck, unit tests, and a production build on pushes and pull requests.
+
+## Project structure
+
+    perceptron/
+    ├── src/
+    │   ├── app/                 # Next.js routes and API handlers
+    │   ├── components/          # UI components
+    │   └── lib/                 # detection engine, auth, ingestion, data
+    ├── tests/
+    │   ├── e2e/
+    │   └── ingest.test.ts
+    ├── public/
+    ├── .env.example
+    ├── .github/workflows/ci.yml
+    ├── next.config.ts
+    ├── proxy.ts
+    └── package.json
+
+## Limitations
+
+- Demo data is synthetic.
+- There is no persistent database.
+- Rate limiting and the audit log are per-process and reset on restart.
+- The anomaly score is statistical, not a trained fraud classifier.
+- Uploaded data is analyzed in memory and is not retained.
+- Findings are investigative leads and require human verification.
+
+## License
+
+MIT
