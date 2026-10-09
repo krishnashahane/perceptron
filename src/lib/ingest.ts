@@ -92,7 +92,12 @@ export function parseCsvToDataset(text: string, maxRows = 5000): IngestResult {
     const district = get("district") || "Unknown";
     const bank = get("bank_account") || `BANK-${id}`;
     const con = get("contractor_id") || "C-EXT";
-    const amount = Math.round(Number(get("amount")) || 0);
+    const amountRaw = Number(get("amount"));
+    if (!Number.isFinite(amountRaw) || amountRaw < 0) {
+      if (errors.length < 12) errors.push(`Row ${i}: invalid amount — skipped`);
+      continue;
+    }
+    const amount = Math.round(amountRaw);
     const ts = parseTs(get("payment_ts"));
     const lat = Number(get("lat")) || ANCHOR[0];
     const lng = Number(get("lng")) || ANCHOR[1];
